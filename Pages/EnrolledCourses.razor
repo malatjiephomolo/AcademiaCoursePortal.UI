@@ -1,0 +1,52 @@
+﻿@page "/enrolledcourses"
+@using AcademiaCoursePortal.UI.Models;
+@using AcademiaCoursePortal.UI.MockData
+@inject HttpClient Http
+@inject EnrolledCoursesDataService EnrolledCoursesDataService;
+
+<PageTitle>Enrolld Courses</PageTitle>
+
+<h1>Courses</h1>
+
+<p>List of available enrolled courses.</p>
+
+@if (courses == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (courses.Count == 0)
+{
+    <p>You have not enrolled any course.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Title</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var course in courses)
+            {
+                <tr>
+                    <td>@course.Id</td>
+                    <td>@course.Title</td>
+                    <td>@course.Description</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Course> courses;
+
+    protected override void OnInitialized()
+    {
+        // Load dummy courses on initialization
+        courses = EnrolledCoursesDataService.GetDummyCourses();
+    }
+}

@@ -1,0 +1,70 @@
+﻿@page "/register"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Register</h3>
+
+<EditForm Model="registerModel" OnValidSubmit="HandleRegistration">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="name">Full Name:</label>
+        <InputText id="name" @bind-Value="registerModel.Name" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="username">Username:</label>
+        <InputText id="username" @bind-Value="registerModel.Username" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <InputText id="email" type="email" @bind-Value="registerModel.Email" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <InputText id="password" type="password" @bind-Value="registerModel.Password" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3 mb-3">Register</button>
+</EditForm>
+
+@code {
+    private RegisterModel registerModel = new RegisterModel();
+
+    private async Task HandleRegistration()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/authentication/register", registerModel);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Handle successful registration
+                NavigationManager.NavigateTo("/login");
+            }
+            else
+            {
+                // Handle error response
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                // Display or log the error message
+                Console.WriteLine($"Registration failed: {errorMessage}");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle exceptions
+            Console.WriteLine($"An error occurred: {ex.Message}");
+        }
+    }
+
+    public class RegisterModel
+    {
+        public string? Name { get; set; }
+        public string? Username { get; set; }
+        public string? Email { get; set; }
+        public string? Password { get; set; }
+    }
+}

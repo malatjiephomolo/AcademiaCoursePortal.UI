@@ -1,0 +1,81 @@
+﻿
+@page "/courseenrollment"
+@using AcademiaCoursePortal.UI.Models;
+@using AcademiaCoursePortal.UI.MockData
+@using Blazored.LocalStorage
+@using System.Security.Claims
+@inject ILocalStorageService localStorage
+@using AcademiaCoursePortal.UI.Services;
+@inject DummyDataService DummyDataService;
+@inject EnrollmentService EnrollmentService;
+@inject CustomAuthenticationStateProvider CustomAuthenticationStateProvider
+
+
+<PageTitle>Course Enrollment</PageTitle>
+
+<h1>Available Courses</h1>
+
+@if (courses == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (courses.Count == 0)
+{
+    <p>No courses available.</p>
+}
+else
+{
+    <select class="form-select">
+        @foreach (var course in courses)
+        {
+            <option value="@course.Id">
+                @(string.IsNullOrEmpty(course.Title) ? "" : course.Title)
+            </option>
+        }
+    </select>
+}
+<button class="btn btn-primary mt-3 mb-3" @onclick="EnrollStudent">Enroll</button>
+
+@code {
+    private List<Course> courses;
+    private Student student;
+    private dynamic user;
+    private dynamic userId;
+
+    protected async override void OnInitialized()
+    {
+        // Load dummy courses on initialization
+        courses = DummyDataService.GetDummyCourses();
+       var identity = CustomAuthenticationStateProvider.GetClaimsIdentityFromToken(await localStorage.GetItemAsync<string>("authToken"));
+
+        userId = identity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+    }
+
+    private async Task EnrollStudent()
+    {
+        try
+        {
+            Console.WriteLine(userId.ToString());
+
+            
+            var enrollmentData = new Enrollment
+                {
+                    StudentId = userId, 
+                    CourseId = 2 
+                };
+
+            // Call your service to handle the enrollment
+            await EnrollmentService.AddEnrollmentAsync(enrollmentData);
+
+            
+            Console.WriteLine("Enrollment successful!");
+        }
+        catch (Exception ex)
+        {
+            // Handle any errors that occurred during enrollment
+            Console.WriteLine($"Error enrolling student: {ex.Message}");
+        }
+    }
+}
+
